@@ -44,6 +44,7 @@
   display: flex;
   flex-direction: column;
   padding: 1em 1.25em;
+  gap: 0.5em;
 }
 .modal__body label {
   padding: 0.5em 1em;
@@ -53,7 +54,6 @@
   font-size: 1em;
   padding: 0.25em 0.625em;
   margin-left: 0.5em;
-  width: 200px;
 }
 
 .modal__buttons {
@@ -76,4 +76,22 @@
 }
 .modal__btn:hover {
   background-color: #32a394;
+}
+.nameInput {
+  width: 200px;
+}
+.complexityInput {
+  width: 50px;
+  text-align: center;
+}
+.complexityButton {
+  margin-left: 0.5em;
+  width: 30px;
+  border-radius: 10px;
+  background-color: #478a81;
+  border: none;
+  color: white;
+  text-align: center;
+  font-size: 1.25em;
+  cursor: pointer;
 }

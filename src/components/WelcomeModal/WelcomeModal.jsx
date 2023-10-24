@@ -42,6 +42,16 @@ const WelcomeModal = ({ isOpen, onClose, startGame }) => {
     return null;
   }
 
+  function complexityPlus(e) {
+    e.stopPropagation();
+    setInputComplexity((prev) => Math.min(Number(prev) + 1, 10));
+  }
+
+  function complexityMinus(e) {
+    e.stopPropagation();
+    setInputComplexity((prev) => Math.max(Number(prev) - 1, 0));
+  }
+
   return (
     <div className={styles.modal__bg} onClick={handleClick}>
       <div className={styles.modal__box} data-id="modalbox">
@@ -60,24 +70,44 @@ const WelcomeModal = ({ isOpen, onClose, startGame }) => {
             <Loader />
           ) : (
             <div className={styles.modal__body}>
-              <label>
-                Your Name:
+              <div className={styles.modal__control}>
+                <label>
+                  Your Name:
+                  <input
+                    className={styles.nameInput}
+                    required
+                    type="text"
+                    value={inputName}
+                    placeholder="Enter your name"
+                    onChange={(e) => setInputName(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div className={styles.modal__control}>
+                <label>Complexity:</label>
+                <button
+                  onClick={complexityMinus}
+                  type="button"
+                  className={styles.complexityButton}
+                >
+                  -
+                </button>
                 <input
-                  type="text"
-                  value={inputName}
-                  placeholder="Enter your name"
-                  onChange={(e) => setInputName(e.target.value)}
-                />
-              </label>
-              <label>
-                Complexity:
-                <input
+                  className={styles.complexityInput}
+                  readOnly
                   type="text"
                   placeholder="From 0 to 10"
                   value={inputComplexity}
                   onChange={(e) => setInputComplexity(e.target.value)}
                 />
-              </label>
+                <button
+                  onClick={complexityPlus}
+                  type="button"
+                  className={styles.complexityButton}
+                >
+                  +
+                </button>
+              </div>
             </div>
           )}
           <div className={styles.modal__buttons}>
