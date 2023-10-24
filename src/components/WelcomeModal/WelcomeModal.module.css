@@ -1,0 +1,79 @@
+.modal__bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: rgba(70, 70, 70, 0.75);
+  backdrop-filter: blur(10px);
+}
+.modal__box {
+  width: 90%;
+  max-width: 430px;
+  background-color: #fff;
+  border-radius: 0.25em;
+  display: flex;
+  flex-direction: column;
+}
+.modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.375em;
+  font-weight: bold;
+  padding: 0.875em 0.75em;
+}
+
+.modal__close {
+  display: flex;
+  width: 25px;
+  height: 25px;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.modal__body {
+  background-color: beige;
+  display: flex;
+  flex-direction: column;
+  padding: 1em 1.25em;
+}
+.modal__body label {
+  padding: 0.5em 1em;
+  font-size: 1.125em;
+}
+.modal__body input {
+  font-size: 1em;
+  padding: 0.25em 0.625em;
+  margin-left: 0.5em;
+  width: 200px;
+}
+
+.modal__buttons {
+  display: flex;
+  justify-content: center;
+  padding: 1em 1.25em;
+}
+
+.modal__btn {
+  padding: 0.5em 1.75em;
+  font-family: "Roboto Condensed", sans-serif;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 0.25em;
+  cursor: pointer;
+  color: white;
+  font-size: 1.125em;
+  background-color: #478a81;
+  transition: 0.1s all linear;
+}
+.modal__btn:hover {
+  background-color: #32a394;
+}

@@ -1,0 +1,65 @@
+.gamePlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gameTitle {
+  line-height: 3em;
+}
+
+.startGame {
+  padding: 0.5em 1.5em;
+  background-color: forestgreen;
+  color: whitesmoke;
+  border-radius: 0.25em;
+  cursor: pointer;
+  font-size: 1.125em;
+  font-family: inherit;
+  transition: 0.1s linear all;
+  border: none;
+}
+
+.startGame:hover {
+  transform: scale(1.01);
+  color: bisque;
+  background-color: darkgreen;
+  box-shadow: 0px 0px 5px #333;
+}
+
+.gameInfo {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 0 1em;
+}
+.gameInfo div h4 {
+  color: #999;
+}
+.gameInfo div h4 span {
+  color: #333;
+}
+.gameField {
+  background-color: #fff;
+  border: 1px dashed black;
+  margin-top: 2em;
+}
+
+.gameSpeed {
+  margin-top: 1.5em;
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  padding: 0 1em;
+}
+.gameSpeed div {
+  display: flex;
+  justify-content: center;
+  width: 50%;
+  flex-direction: column;
+  text-align: center;
+}
+
+.gameSpeed div h3 {
+  text-align: center;
+}
