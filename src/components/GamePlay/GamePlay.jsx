@@ -6,23 +6,34 @@ import WelcomeModal from "../WelcomeModal/WelcomeModal";
 import GameOverModal from "../GameOverModal/GameOverModal";
 import { makePolygonString } from "../../services/walls";
 import { addLeader } from "../../services/leaders";
+import {
+  GAMEFIELD_HEIGHT,
+  GAMEFIELD_WIDTH,
+  MAX_HORIZONTAL_SPEED,
+  MAX_VERTICAL_SPEED,
+  SCORE_MULTIPLIER,
+  SHIP_SIZE,
+  WALL_HEIGHT,
+} from "../../constants";
 
 const GamePlay = () => {
-  const SHIP_SIZE = 20;
-  const MAX_HORIZONTAL_SPEED = 3;
-  const MAX_VERTICAL_SPEED = 5;
-  const WALL_HEIGHT = 10;
-
   const [showModal, setShowModal] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
 
-  const [playerName, setPlayerName] = useState("");
-  const [userId, setUserId] = useState("");
-  const [gameComplexity, setGameComplexity] = useState("");
-  const [gameToken, setGameToken] = useState("");
-  const [gameStatus, setGameStatus] = useState("");
+  const [gameInfo, setGameInfo] = useState({
+    playerName: "",
+    userId: "",
+    gameComplexity: "",
+    gameToken: "",
+    gameStatus: "lose",
+  });
 
-  const scoreMultiplier = 0.75;
+  // const [playerName, setPlayerName] = useState("");
+  // const [userId, setUserId] = useState("");
+
+  // const [gameComplexity, setGameComplexity] = useState("");
+  // const [gameToken, setGameToken] = useState("");
+  const [gameStatus, setGameStatus] = useState("lose");
 
   const shipRef = useRef();
   const hSpeedRef = useRef();
@@ -30,9 +41,9 @@ const GamePlay = () => {
 
   const scoreRef = useRef(0);
   const posRef = useRef();
-  const wallYRef = useRef();
-  const wallSegmentRef = useRef();
-  const wallHeightRef = useRef();
+  // const wallYRef = useRef();
+  // const wallSegmentRef = useRef();
+  // const wallHeightRef = useRef();
 
   const leftWallRef = useRef();
   const rightWallRef = useRef();
@@ -53,49 +64,53 @@ const GamePlay = () => {
   };
 
   async function initGameHandler(name, complexity, id, token) {
-    setPlayerName(name);
-    setGameComplexity(complexity);
-    setGameToken(token);
-    setUserId(id);
+    //setPlayerName(name);
+    //setGameComplexity(complexity);
+    //setGameToken(token);
+    //setUserId(id);
+    setGameInfo({
+      ...gameInfo,
+      playerName: name,
+      gameComplexity: complexity,
+      gameToken: token,
+      userId: id,
+    });
+    // setGameInfo({ ...gameInfo, gameComplexity: complexity });
+    // setGameInfo({ ...gameInfo, gameToken: token });
+    // setGameInfo({ ...gameInfo, userId: id });
 
     setShowModal(false);
   }
 
   const handleKeyStroke = useCallback((e) => {
-    const h = +hSpeedRef.current?.textContent;
-    const v = +vSpeedRef.current?.textContent;
-
     switch (e.keyCode) {
-      // SPACE
-      case 32:
-        alert(
-          "Current array index is: " +
-            Math.ceil((wallYRef.current.textContent / 10) * -1)
-        );
-        break;
       // ARROW LEFT
       case 37:
-        if (h > -MAX_HORIZONTAL_SPEED) {
-          hSpeedRef.current.textContent = Number(h - 1);
-        }
+        animationState.current.hSpeed = Math.max(
+          animationState.current.hSpeed - 1,
+          -MAX_HORIZONTAL_SPEED
+        );
         break;
       // ARROW RIGHT
       case 39:
-        if (h < MAX_HORIZONTAL_SPEED) {
-          hSpeedRef.current.textContent = Number(h + 1);
-        }
+        animationState.current.hSpeed = Math.min(
+          animationState.current.hSpeed + 1,
+          MAX_HORIZONTAL_SPEED
+        );
         break;
       // ARROW UP
       case 38:
-        if (v > 0) {
-          vSpeedRef.current.textContent = v - 1;
-        }
+        animationState.current.vSpeed = Math.max(
+          animationState.current.vSpeed - 1,
+          0
+        );
         break;
       // ARROW DOWN
       case 40:
-        if (v < MAX_VERTICAL_SPEED) {
-          vSpeedRef.current.textContent = v + 1;
-        }
+        animationState.current.vSpeed = Math.min(
+          animationState.current.vSpeed + 1,
+          MAX_VERTICAL_SPEED
+        );
         break;
       default:
         break;
@@ -117,7 +132,7 @@ const GamePlay = () => {
     ws.onmessage = function (event) {
       try {
         if (event.data !== "finished") {
-          const points = event.data.split(",");
+          const points = event.data?.split(",");
           leftWallPoints.push(250 + Number(points[0]));
           rightWallPoints.push(250 + Number(points[1]));
 
@@ -143,20 +158,24 @@ const GamePlay = () => {
         console.log(err);
       }
     };
+
+    ws.onerror = function (event) {
+      console.log(event.err);
+    };
+
+    return () => {
+      ws.close();
+    };
   }, []);
 
   function checkLeftWallCrash() {
     const leftPoints = leftPolygonRef.current
       ?.getAttribute("points")
-      .split(" ");
+      ?.split(" ");
 
-    const leftWallPos =
-      leftPoints.slice(2)[Number(wallSegmentRef.current.textContent)];
+    const leftWallPos = leftPoints.slice(2)[animationState.current.wallSegment];
 
-    if (
-      Number(shipRef.current.getAttribute("x")) <=
-      Number(leftWallPos.split(",")[0])
-    ) {
+    if (animationState.current.shipX <= Number(leftWallPos?.split(",")[0])) {
       setGameStatus("lose");
       setShowGameOver(true);
 
@@ -167,14 +186,14 @@ const GamePlay = () => {
   function checkRightWallCrash() {
     const rightPoints = rightPolygonRef.current
       ?.getAttribute("points")
-      .split(" ");
+      ?.split(" ");
 
     const rightWallPos =
-      rightPoints.slice(2)[Number(wallSegmentRef.current.textContent)];
+      rightPoints.slice(2)[animationState.current.wallSegment];
 
     if (
-      Number(shipRef.current.getAttribute("x")) + SHIP_SIZE >=
-      Number(rightWallPos.split(",")[0])
+      animationState.current.shipX + SHIP_SIZE >=
+      Number(rightWallPos?.split(",")[0])
     ) {
       setGameStatus("lose");
       setShowGameOver(true);
@@ -191,64 +210,77 @@ const GamePlay = () => {
     };
   }, [handleKeyStroke]);
 
-  useEffect(() => {
-    getWallPoints(userId, gameToken);
+  // This won't cause a re-render
+  const animationState = useRef({
+    shipX: 240,
+    shipY: 0,
+    wallY: 0,
+    wallSegment: 0,
+    hSpeed: 0,
+    vSpeed: 0,
+    score: 0,
+  });
 
-    let dx = 0;
-    let dy = 0;
+  useEffect(() => {
+    getWallPoints(gameInfo.userId, gameInfo.gameToken);
+
     const ship = shipRef.current;
     let play = true;
 
     let animationId;
 
     function step() {
-      dx = Number(hSpeedRef.current.textContent);
-      dy = Number(vSpeedRef.current.textContent);
-
-      let x;
-      let y;
-
       if (ship) {
-        x = Number(ship.getAttribute("x"));
-        y = Number(ship.getAttribute("y"));
+        hSpeedRef.current.textContent = animationState.current.hSpeed;
+        vSpeedRef.current.textContent = animationState.current.vSpeed;
+        posRef.current.textContent =
+          "(x,y) = " +
+          animationState.current.shipX +
+          "," +
+          animationState.current.shipY;
 
-        posRef.current.textContent = "(x,y) = " + x + "," + y;
-        let new_x = Math.round(x + dx);
+        animationState.current.shipX = Math.round(
+          animationState.current.shipX + animationState.current.hSpeed
+        );
 
-        ship.setAttribute("x", new_x);
-        ship.setAttribute("y", 0);
+        ship.setAttribute("x", animationState.current.shipX);
 
-        let new_WallY = +leftWallRef.current.getAttribute("y") - dy;
+        animationState.current.wallY =
+          +leftWallRef.current.getAttribute("y") -
+          animationState.current.vSpeed;
 
         if (
-          Math.ceil((wallYRef.current.textContent / 10) * -1) >
-          Number(wallSegmentRef.current.textContent)
+          Math.ceil((animationState.current.wallY / 10) * -1) >
+          animationState.current.wallSegment
         ) {
-          scoreRef.current.textContent =
-            +scoreRef.current.textContent +
-            Math.round(scoreMultiplier * (dy + gameComplexity));
+          animationState.current.score += Math.round(
+            SCORE_MULTIPLIER *
+              (animationState.current.vSpeed + gameInfo.gameComplexity)
+          );
+          scoreRef.current.textContent = animationState.current.score;
         }
 
-        wallSegmentRef.current.textContent = Math.ceil(
-          (wallYRef.current.textContent / 10) * -1
+        animationState.current.wallSegment = Math.ceil(
+          (animationState.current.wallY / 10) * -1
         );
 
         if (
-          +wallYRef.current.textContent !== 0 &&
-          +wallYRef.current.textContent * -1 >
-            +wallHeightRef.current.textContent - WALL_HEIGHT
+          animationState.current.wallY !== 0 &&
+          animationState.current.wallY * -1 >
+            +leftWallRef.current.getAttribute("height") - WALL_HEIGHT
         ) {
           setGameStatus("win");
 
           const newLeader = {
-            name: playerName,
-            complexity: gameComplexity,
+            name: gameInfo.playerName,
+            complexity: gameInfo.gameComplexity,
             score: scoreRef.current.textContent,
           };
 
           addLeader(newLeader);
 
           setShowGameOver(true);
+          cancelAnimationFrame(animationId);
           play = false;
         } else {
           if (checkLeftWallCrash()) {
@@ -261,12 +293,8 @@ const GamePlay = () => {
           }
         }
 
-        leftWallRef.current.setAttribute("y", new_WallY);
-        rightWallRef.current.setAttribute("y", new_WallY);
-        wallYRef.current.textContent = leftWallRef.current.getAttribute("y");
-
-        wallHeightRef.current.textContent =
-          leftWallRef.current.getAttribute("height");
+        leftWallRef.current.setAttribute("y", animationState.current.wallY);
+        rightWallRef.current.setAttribute("y", animationState.current.wallY);
       }
 
       if (play) animationId = requestAnimationFrame(step);
@@ -276,36 +304,28 @@ const GamePlay = () => {
       requestAnimationFrame(step);
     }
 
-    // Loading points by WebSocket and start animation with little delay.
     if (shipRef.current) {
       setTimeout(() => {
         startAnimation();
-      }, 500);
+      }, 250);
     }
-  }, [
-    gameToken,
-    handleKeyStroke,
-    gameComplexity,
-    userId,
-    getWallPoints,
-    playerName,
-  ]);
+  }, [gameInfo, handleKeyStroke, getWallPoints]);
 
   return (
     <div className={styles.gamePlay}>
       <img src={dronLogo} width="185" height="105" alt="Dron" />
       <h1 className={styles.gameTitle}>Escape from the Cave</h1>
-      {gameToken ? (
+      {gameInfo.gameToken ? (
         <>
           <div className={styles.gameInfo}>
             <div>
               <h4>
-                Name: <span>{playerName}</span>
+                Name: <span>{gameInfo.playerName}</span>
               </h4>
             </div>
             <div>
               <h4>
-                Complexity: <span>{gameComplexity}</span>
+                Complexity: <span>{gameInfo.gameComplexity}</span>
               </h4>
             </div>
             <div>
@@ -321,7 +341,8 @@ const GamePlay = () => {
                 Horizontal Speed
                 <br />
                 <label>
-                  <span ref={hSpeedRef}>0</span>km/h
+                  <span ref={hSpeedRef}>0</span>
+                  km/h
                 </label>
               </h3>
             </div>
@@ -339,12 +360,16 @@ const GamePlay = () => {
             </div>
           </div>
 
-          <svg className={styles.gameField} width="500" height="300">
+          <svg
+            className={styles.gameField}
+            width={GAMEFIELD_WIDTH}
+            height={GAMEFIELD_HEIGHT}
+          >
             <svg
               ref={shipRef}
               height={(SHIP_SIZE * Math.sqrt(3)) / 2}
               width={SHIP_SIZE}
-              x={250 - SHIP_SIZE / 2}
+              x={GAMEFIELD_WIDTH / 2 - SHIP_SIZE / 2}
               y="0"
             >
               <polygon
@@ -354,14 +379,14 @@ const GamePlay = () => {
                 style={{ fill: "#1dc823" }}
               />
             </svg>
-            <svg ref={leftWallRef} width="500" height="1000" x="0" y="0">
+            <svg ref={leftWallRef} width={GAMEFIELD_WIDTH} x="0" y="0">
               <polygon
                 ref={leftPolygonRef}
                 points=""
                 style={{ fill: "#646464" }}
               />
             </svg>
-            <svg ref={rightWallRef} width="500" height="1000" x="0" y="0">
+            <svg ref={rightWallRef} width={GAMEFIELD_WIDTH} x="0" y="0">
               <polygon
                 ref={rightPolygonRef}
                 points=""
@@ -369,22 +394,6 @@ const GamePlay = () => {
               />
             </svg>
           </svg>
-          <div className={styles.gameSpeed}>
-            <div>
-              WallHeight <br />
-              <label ref={wallHeightRef}>0</label> <br />
-            </div>
-            <div>
-              wallYRef
-              <br />
-              <label ref={wallYRef}>0</label> <br />
-            </div>
-            <div>
-              currentSegment
-              <br />
-              <label ref={wallSegmentRef}>0</label> <br />
-            </div>
-          </div>
         </>
       ) : (
         <>
@@ -405,7 +414,7 @@ const GamePlay = () => {
         <GameOverModal
           status={gameStatus}
           onClose={showGameOverHandler}
-          score={+scoreRef.current.textContent}
+          score={animationState.current.score}
         />
       )}
     </div>
