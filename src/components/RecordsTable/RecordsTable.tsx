@@ -3,9 +3,15 @@ import styles from "./RecordsTable.module.css";
 import Loader from "../../Loader";
 import { sortLeadersByScore } from "../../services/leaders";
 
-const RecordsTable = () => {
+interface Leader {
+  name: string;
+  complexity: string;
+  score: string;
+}
+
+const RecordsTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [leaders, setLeaders] = useState([]);
+  const [leaders, setLeaders] = useState<Leader[]>([]);
 
   // const liders = [
   //   { name: "Petro", complexity: "5", score: "171" },
@@ -21,10 +27,9 @@ const RecordsTable = () => {
   // ];
 
   useEffect(() => {
-    //localStorage.setItem("leaders", JSON.stringify(liders));
     setLoading(true);
     if (localStorage.getItem("leaders")) {
-      setLeaders(JSON.parse(localStorage.getItem("leaders")));
+      setLeaders(JSON.parse(localStorage.getItem("leaders")!) as Leader[]);
     }
 
     setLoading(false);

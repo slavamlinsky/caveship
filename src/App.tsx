@@ -1,6 +1,7 @@
+import React from 'react';
 import GamePlay from "./components/GamePlay/GamePlay";
 
-function App() {
+const App: React.FC = () => {
   return (
     <div className="App">
       <GamePlay />
